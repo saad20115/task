@@ -30,7 +30,8 @@ export interface Task {
   odoo_module?: string;
   created_by: string;
   assigned_to?: string;
-  due_date?: string;
+  start_date?: string;
+  end_date?: string;
   created_at: string;
   updated_at: string;
   sort_order: number;

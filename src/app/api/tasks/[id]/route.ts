@@ -35,7 +35,8 @@ export async function GET(request: NextRequest, { params }: { params: { id: stri
       assigned_to: task.assignedTo,
       short_description: task.shortDescription,
       odoo_module: task.odooModule,
-      due_date: task.dueDate,
+      start_date: task.startDate,
+      end_date: task.endDate,
       created_at: task.createdAt.toISOString(),
       updated_at: task.updatedAt.toISOString(),
       creator: transformEmployee(task.creator),
@@ -82,6 +83,8 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
     if (body.title !== undefined) updateData.title = body.title;
     if (body.description !== undefined) updateData.description = body.description;
     if (body.assigned_to !== undefined) updateData.assignedTo = body.assigned_to;
+    if (body.start_date !== undefined) updateData.startDate = body.start_date;
+    if (body.end_date !== undefined) updateData.endDate = body.end_date;
 
     const task = await prisma.task.update({
       where: { id: params.id },
@@ -118,13 +121,27 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
       });
     }
 
+    // Log assignee change
+    if (body.assigned_to !== undefined && oldTask && oldTask.assignedTo !== body.assigned_to) {
+      await prisma.activityLog.create({
+        data: {
+          taskId: params.id,
+          actorId,
+          action: 'تعيين مطور',
+          oldValue: oldTask.assignedTo || 'لا يوجد',
+          newValue: body.assigned_to || 'لا يوجد',
+        },
+      });
+    }
+
     const transformed = {
       ...task,
       created_by: task.createdBy,
       assigned_to: task.assignedTo,
       short_description: task.shortDescription,
       odoo_module: task.odooModule,
-      due_date: task.dueDate,
+      start_date: task.startDate,
+      end_date: task.endDate,
       created_at: task.createdAt.toISOString(),
       updated_at: task.updatedAt.toISOString(),
       creator: transformEmployee(task.creator),

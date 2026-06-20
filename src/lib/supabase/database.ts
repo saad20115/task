@@ -78,7 +78,8 @@ export async function createTask(task: {
   odoo_module?: string;
   created_by: string;
   assigned_to?: string;
-  due_date?: string;
+  start_date?: string;
+  end_date?: string;
 }): Promise<Task> {
   return fetchAPI<Task>('/api/tasks', {
     method: 'POST',

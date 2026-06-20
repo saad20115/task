@@ -98,12 +98,12 @@ export default function TasksPage() {
       case 'priority':
         result.sort((a, b) => (PRIORITY_ORDER[a.priority] ?? 3) - (PRIORITY_ORDER[b.priority] ?? 3));
         break;
-      case 'due_date':
+      case 'end_date':
         result.sort((a, b) => {
-          if (!a.due_date && !b.due_date) return 0;
-          if (!a.due_date) return 1;
-          if (!b.due_date) return -1;
-          return new Date(a.due_date).getTime() - new Date(b.due_date).getTime();
+          if (!a.end_date && !b.end_date) return 0;
+          if (!a.end_date) return 1;
+          if (!b.end_date) return -1;
+          return new Date(a.end_date).getTime() - new Date(b.end_date).getTime();
         });
         break;
       case 'title':
@@ -138,7 +138,7 @@ export default function TasksPage() {
     { value: 'newest', label: 'الأحدث أولاً' },
     { value: 'oldest', label: 'الأقدم أولاً' },
     { value: 'priority', label: 'الأولوية' },
-    { value: 'due_date', label: 'موعد التسليم' },
+    { value: 'end_date', label: 'تاريخ الانتهاء' },
     { value: 'title', label: 'العنوان' },
   ];
 

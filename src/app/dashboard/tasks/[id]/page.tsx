@@ -35,9 +35,10 @@ import {
   addComment,
   getActivityLog,
   uploadFileWithUser,
+  getEmployees,
 } from '@/lib/supabase/database';
-import { Task, Comment, ActivityLog, TaskStatus, TaskPriority } from '@/lib/types';
-import { timeAgo, formatDate, formatDateTime, formatFileSize } from '@/lib/utils';
+import { Task, Comment, ActivityLog, TaskStatus, TaskPriority, Employee } from '@/lib/types';
+import { timeAgo, formatDateTime, formatFileSize } from '@/lib/utils';
 import {
   TASK_STATUS_LABELS,
   TASK_PRIORITY_LABELS,
@@ -55,17 +56,20 @@ export default function TaskDetailPage() {
   const [isSubmittingComment, setIsSubmittingComment] = useState(false);
   const [showArchiveModal, setShowArchiveModal] = useState(false);
   const [activeTab, setActiveTab] = useState<'comments' | 'attachments' | 'activity'>('comments');
+  const [employees, setEmployees] = useState<Employee[]>([]);
 
   const taskId = params.id as string;
 
   const loadTask = async () => {
     try {
-      const [taskData, activityData] = await Promise.all([
+      const [taskData, activityData, empData] = await Promise.all([
         getTaskById(taskId),
         getActivityLog(taskId),
+        getEmployees(),
       ]);
       setTask(taskData);
       setActivities(activityData);
+      setEmployees(empData);
     } catch (error) {
       console.error('Failed to load task:', error);
     } finally {
@@ -99,6 +103,28 @@ export default function TaskDetailPage() {
       setActivities(activityData);
     } catch (error) {
       console.error('Failed to update priority:', error);
+    }
+  };
+
+  const handleAssigneeChange = async (newAssignee: string) => {
+    if (!task || !user) return;
+    try {
+      const updated = await updateTask(task.id, { assigned_to: newAssignee || undefined }, user.id);
+      setTask({ ...task, ...updated });
+      const activityData = await getActivityLog(taskId);
+      setActivities(activityData);
+    } catch (error) {
+      console.error('Failed to update assignee:', error);
+    }
+  };
+
+  const handleDateChange = async (field: 'start_date' | 'end_date', newDate: string) => {
+    if (!task || !user) return;
+    try {
+      const updated = await updateTask(task.id, { [field]: newDate || undefined }, user.id);
+      setTask({ ...task, ...updated });
+    } catch (error) {
+      console.error(`Failed to update ${field}:`, error);
     }
   };
 
@@ -448,30 +474,40 @@ export default function TaskDetailPage() {
               </div>
 
               {/* Assignee */}
-              {task.assignee && (
-                <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 rounded-lg bg-brand-50 flex items-center justify-center">
-                    <User size={14} className="text-brand-500" />
-                  </div>
-                  <div>
-                    <p className="text-xs text-slate-400">المطور المسؤول</p>
-                    <p className="text-sm font-medium text-slate-700">{task.assignee.name}</p>
-                  </div>
-                </div>
-              )}
+              <Select
+                label="المطور المسؤول"
+                options={[
+                  { value: '', label: 'غير محدد' },
+                  ...employees.filter((e) => e.role === 'developer' || e.role === 'admin').map((e) => ({ value: e.id, label: e.name }))
+                ]}
+                value={task.assigned_to || ''}
+                onChange={(e) => handleAssigneeChange(e.target.value)}
+                id="change-assignee"
+              />
 
-              {/* Due Date */}
-              {task.due_date && (
-                <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 rounded-lg bg-amber-50 flex items-center justify-center">
-                    <Calendar size={14} className="text-amber-500" />
-                  </div>
-                  <div>
-                    <p className="text-xs text-slate-400">تاريخ التسليم</p>
-                    <p className="text-sm font-medium text-slate-700" dir="ltr">{formatDate(task.due_date)}</p>
-                  </div>
-                </div>
-              )}
+              {/* Start Date */}
+              <div>
+                <label className="block text-xs font-semibold text-slate-700 mb-1">تاريخ البداية</label>
+                <input
+                  type="date"
+                  className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm font-medium text-slate-700 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent transition-colors hover:bg-slate-100"
+                  value={task.start_date || ''}
+                  onChange={(e) => handleDateChange('start_date', e.target.value)}
+                  dir="ltr"
+                />
+              </div>
+
+              {/* End Date */}
+              <div>
+                <label className="block text-xs font-semibold text-slate-700 mb-1">تاريخ الانتهاء</label>
+                <input
+                  type="date"
+                  className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm font-medium text-slate-700 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent transition-colors hover:bg-slate-100"
+                  value={task.end_date || ''}
+                  onChange={(e) => handleDateChange('end_date', e.target.value)}
+                  dir="ltr"
+                />
+              </div>
 
               {/* Created At */}
               <div className="flex items-center gap-3">

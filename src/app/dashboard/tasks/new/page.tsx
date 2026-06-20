@@ -31,7 +31,8 @@ export default function NewTaskPage() {
     category: 'other',
     odoo_module: '',
     assigned_to: '',
-    due_date: '',
+    start_date: '',
+    end_date: '',
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
 
@@ -63,7 +64,8 @@ export default function NewTaskPage() {
         odoo_module: formData.odoo_module || undefined,
         created_by: user.id,
         assigned_to: formData.assigned_to || undefined,
-        due_date: formData.due_date || undefined,
+        start_date: formData.start_date || undefined,
+        end_date: formData.end_date || undefined,
       });
 
       // Upload files
@@ -205,15 +207,25 @@ export default function NewTaskPage() {
                   />
                 </div>
 
-                {/* Due Date */}
-                <Input
-                  label="تاريخ التسليم المتوقع"
-                  type="date"
-                  value={formData.due_date}
-                  onChange={(e) => setFormData({ ...formData, due_date: e.target.value })}
-                  id="task-due-date"
-                  dir="ltr"
-                />
+                  {/* Start and End Date */}
+                  <div className="grid grid-cols-2 gap-4">
+                    <Input
+                      label="تاريخ البداية"
+                      type="date"
+                      value={formData.start_date}
+                      onChange={(e) => setFormData({ ...formData, start_date: e.target.value })}
+                      id="task-start-date"
+                      dir="ltr"
+                    />
+                    <Input
+                      label="تاريخ الانتهاء"
+                      type="date"
+                      value={formData.end_date}
+                      onChange={(e) => setFormData({ ...formData, end_date: e.target.value })}
+                      id="task-end-date"
+                      dir="ltr"
+                    />
+                  </div>
 
                 {/* File Upload */}
                 <div>

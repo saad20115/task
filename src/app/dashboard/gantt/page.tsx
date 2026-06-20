@@ -246,8 +246,8 @@ export default function GanttPage() {
                   </div>
                 ) : (
                   filteredTasks.map((task, idx) => {
-                    const created = new Date(task.created_at);
-                    const due = task.due_date ? new Date(task.due_date) : null;
+                    const created = task.start_date ? new Date(task.start_date) : new Date(task.created_at);
+                    const due = task.end_date ? new Date(task.end_date) : null;
 
                     return (
                       <div

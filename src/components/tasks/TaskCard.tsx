@@ -47,7 +47,7 @@ function getDueDateStatus(dueDate: string | undefined): { label: string; color: 
 
 export default function TaskCard({ task, index = 0, showReorder, isFirst, isLast, onMoveUp, onMoveDown }: TaskCardProps) {
   const router = useRouter();
-  const dueDateStatus = task.status !== 'done' && task.status !== 'cancelled' ? getDueDateStatus(task.due_date) : null;
+  const dueDateStatus = task.status !== 'done' && task.status !== 'cancelled' ? getDueDateStatus(task.end_date) : null;
 
   return (
     <motion.div
@@ -127,10 +127,10 @@ export default function TaskCard({ task, index = 0, showReorder, isFirst, isLast
 
               <div className="flex items-center gap-3 text-slate-400">
                 {/* Due date */}
-                {task.due_date && (
+                {task.end_date && (
                   <span className={`flex items-center gap-1 text-xs ${dueDateStatus ? dueDateStatus.color : ''}`}>
                     <Calendar size={12} />
-                    {formatDate(task.due_date)}
+                    {formatDate(task.end_date)}
                   </span>
                 )}
                 {/* Comments count */}
