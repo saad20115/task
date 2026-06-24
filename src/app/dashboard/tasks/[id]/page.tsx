@@ -361,6 +361,7 @@ export default function TaskDetailPage() {
                           </div>
                           <a
                             href={att.file_url}
+                            download={att.file_name}
                             target="_blank"
                             rel="noopener noreferrer"
                             className="p-2 hover:bg-white rounded-lg transition-colors"
